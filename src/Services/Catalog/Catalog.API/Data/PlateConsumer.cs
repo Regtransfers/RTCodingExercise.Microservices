@@ -14,7 +14,7 @@ namespace Catalog.API.Data
 
         public async Task Consume(ConsumeContext<Plate> context)
         {
-            await _repository.AddLicensePlate(context.Message);
+            await _repository.AddLicensePlateAsync(context.Message);
         }
     }
 }

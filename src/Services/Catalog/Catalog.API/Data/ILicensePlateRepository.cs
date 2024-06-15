@@ -4,6 +4,6 @@
     {
         Task<IEnumerable<Plate>> GetAllAsync();
 
-        Task AddLicensePlate(Plate plate);
+        Task AddLicensePlateAsync(Plate plate);
     }
 }

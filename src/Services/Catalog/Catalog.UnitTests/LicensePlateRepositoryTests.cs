@@ -15,10 +15,8 @@ namespace Catalog.UnitTests
 {
     public class LicensePlateRepositoryTests
     {
-        private readonly ILicensePlateRepository _licensePlateRepository;
         private readonly DbConnection _connection;
         private readonly DbContextOptions<ApplicationDbContext> _contextOptions;
-        private readonly Mock<IDesignTimeDbContextFactory<ApplicationDbContext>> _applicationDbContextFactory;
 
         private IList<Plate> _seedDataPlates = new List<Plate>()
         {
@@ -42,10 +40,7 @@ namespace Catalog.UnitTests
             context.AddRange(_seedDataPlates);
 
             context.SaveChanges();
-
-            _applicationDbContextFactory = new Mock<IDesignTimeDbContextFactory<ApplicationDbContext>>();
-            
-            _licensePlateRepository = new LicensePlateRepository(_applicationDbContextFactory.Object);
+           
         }
 
         ApplicationDbContext CreateContext() => new(_contextOptions);
@@ -57,10 +52,10 @@ namespace Catalog.UnitTests
         {
             // Arrange 
             using var context = CreateContext();
-            _applicationDbContextFactory.Setup(f => f.CreateDbContext(It.IsAny<string[]>())).Returns(context);
+            var licensePlateRepository = new LicensePlateRepository(context);
 
             // Act
-            var result = _licensePlateRepository.GetAllAsync();
+            var result = licensePlateRepository.GetAllAsync();
 
             // Assert
             Assert.Equal(_seedDataPlates, result.Result.ToList());
@@ -71,12 +66,12 @@ namespace Catalog.UnitTests
         {
             // Arrange 
             using var context = CreateContext();
+            var licensePlateRepository = new LicensePlateRepository(context);
 
-            _applicationDbContextFactory.Setup(f => f.CreateDbContext(It.IsAny<string[]>())).Returns(context);
             var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
             
             // Act
-            var result = _licensePlateRepository.AddLicensePlate(newPlate);
+            var result = licensePlateRepository.AddLicensePlateAsync(newPlate);
 
             // Assert
             var plates = context.Plates.ToList();

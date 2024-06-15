@@ -10,14 +10,8 @@ namespace Catalog.API.Services
             _licensePlateRepository = licensePlateRepository;
         }
 
-        public async Task<IEnumerable<Plate>> GetAllAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IEnumerable<Plate>> GetAllAsync() => await _licensePlateRepository.GetAllAsync();
 
-        public async Task AddLicensePlate(Plate plate)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task AddLicensePlate(Plate plate) => await _licensePlateRepository.AddLicensePlateAsync(plate);
     }
 }

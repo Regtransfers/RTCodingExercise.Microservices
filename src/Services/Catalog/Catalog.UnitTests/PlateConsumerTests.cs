@@ -28,7 +28,7 @@ namespace Catalog.UnitTests
 
                 // Assert
                 Assert.True(await harness.Consumed.Any<Plate>());
-                repository.Verify(r => r.AddLicensePlate(It.IsAny<Plate>()), Times.Once);
+                repository.Verify(r => r.AddLicensePlateAsync(It.IsAny<Plate>()), Times.Once);
             }
             finally
             {

@@ -48,13 +48,13 @@ namespace Catalog.UnitTests
             // Arrange
             var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
 
-            _licensePlateRepositoryMock.Setup(x => x.AddLicensePlate(newPlate));
+            _licensePlateRepositoryMock.Setup(x => x.AddLicensePlateAsync(newPlate));
 
             // Act
-            var actualPlates = _licensePlateService.GetAllAsync();
+            var actualPlates = _licensePlateService.AddLicensePlate(newPlate);
 
             // Assert
-            _licensePlateRepositoryMock.Verify(x => x.AddLicensePlate(newPlate), Times.Once());
+            _licensePlateRepositoryMock.Verify(x => x.AddLicensePlateAsync(newPlate), Times.Once());
         }
     }
 }

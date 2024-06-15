@@ -5,11 +5,11 @@ namespace Catalog.API.Data
 {
     public class LicensePlateRepository : ILicensePlateRepository
     {
-        private readonly IDesignTimeDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly ApplicationDbContext _context;
 
-        public LicensePlateRepository(IDesignTimeDbContextFactory<ApplicationDbContext> contextFactory)
+        public LicensePlateRepository(ApplicationDbContext context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public async Task<IEnumerable<Plate>> GetAllAsync()
@@ -17,7 +17,7 @@ namespace Catalog.API.Data
             throw new NotImplementedException();
         }
 
-        public async Task AddLicensePlate(Plate plate)
+        public async Task AddLicensePlateAsync(Plate plate)
         {
             throw new NotImplementedException();
         }
