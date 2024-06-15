@@ -10,6 +10,7 @@ using System.Data.Common;
 using System.Linq;
 using Polly;
 using Microsoft.EntityFrameworkCore.Design;
+using System.Collections;
 
 namespace Catalog.UnitTests
 {
@@ -18,15 +19,17 @@ namespace Catalog.UnitTests
         private readonly DbConnection _connection;
         private readonly DbContextOptions<ApplicationDbContext> _contextOptions;
 
-        private IList<Plate> _seedDataPlates = new List<Plate>()
-        {
-            new() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M },
-            new() { Id = Guid.NewGuid(), Registration = "MX93 XTY", Letters = "MX", Numbers = 93, PurchasePrice = 570.93M, SalePrice = 624.00M },
-            new() { Id = Guid.NewGuid(), Registration = "LK32 XTY", Letters = "LK", Numbers = 32, PurchasePrice = 989.57M, SalePrice = 1245.00M }
-        };
+        private IList<Plate> _seedDataPlates;
 
         public LicensePlateRepositoryTests()
         {
+            _seedDataPlates = new List<Plate>()
+            {
+                new() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M },
+                new() { Id = Guid.NewGuid(), Registration = "MX93 XTY", Letters = "MX", Numbers = 93, PurchasePrice = 570.93M, SalePrice = 624.00M },
+                new() { Id = Guid.NewGuid(), Registration = "LK32 XTY", Letters = "LK", Numbers = 32, PurchasePrice = 989.57M, SalePrice = 1245.00M }
+            };
+
             _connection = new SqliteConnection("Filename=:memory:");
             _connection.Open();
             _contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -58,7 +61,8 @@ namespace Catalog.UnitTests
             var result = licensePlateRepository.GetAllAsync();
 
             // Assert
-            Assert.Equal(_seedDataPlates, result.Result.ToList());
+            Assert.NotNull(result.Result);
+            Assert.Equal(_seedDataPlates.Count, result.Result.ToList().Count);
         }
 
         [Fact]

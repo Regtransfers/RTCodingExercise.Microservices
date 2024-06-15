@@ -12,14 +12,12 @@ namespace Catalog.API.Data
             _context = context;
         }
 
-        public async Task<IEnumerable<Plate>> GetAllAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IEnumerable<Plate>> GetAllAsync() => await _context.Plates.ToListAsync();
 
         public async Task AddLicensePlateAsync(Plate plate)
         {
-            throw new NotImplementedException();
+            _context.Plates.Add(plate);
+            await _context.SaveChangesAsync();
         }
     }
 }
