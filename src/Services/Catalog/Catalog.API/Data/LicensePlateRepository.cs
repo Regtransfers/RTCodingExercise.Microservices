@@ -1,7 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore.Design;
-
-namespace Catalog.API.Data
+﻿namespace Catalog.API.Data
 {
     public class LicensePlateRepository : ILicensePlateRepository
     {
