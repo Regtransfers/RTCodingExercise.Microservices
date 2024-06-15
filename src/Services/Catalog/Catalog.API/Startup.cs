@@ -1,7 +1,9 @@
 ﻿using Catalog.API.Services;
 using MassTransit;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
+using static Catalog.API.Data.PlateConsumer;
 
 namespace Catalog.API
 {
@@ -49,13 +51,14 @@ namespace Catalog.API
 
             services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
             services.AddScoped<ILicensePlateService, LicensePlateService>();
+            services.AddScoped<IDesignTimeDbContextFactory<ApplicationDbContext>, ApplicationDbContextFactory>();
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRazorPages();
 
             services.AddMassTransit(x =>
             {
-                //x.AddConsumer<ConsumerClass>();
+                x.AddConsumer<PlateConsumer>();
 
                 //ADD CONSUMERS HERE
                 x.UsingRabbitMq((context, cfg) =>
