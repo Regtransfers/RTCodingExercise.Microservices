@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using Catalog.API.Services;
+using MassTransit;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
@@ -46,6 +47,8 @@ namespace Catalog.API
                     .AllowCredentials());
             });
 
+            services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
+            services.AddScoped<ILicensePlateService, LicensePlateService>();
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRazorPages();
