@@ -19,6 +19,8 @@ namespace RTCodingExercise.WebMVC
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
+            services.AddHttpClient();
+
             services.AddMassTransit(x =>
             {
                 //x.AddConsumer<ConsumerClass>();
