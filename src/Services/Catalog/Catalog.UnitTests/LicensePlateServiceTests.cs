@@ -5,6 +5,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Catalog.UnitTests
@@ -21,7 +22,7 @@ namespace Catalog.UnitTests
             _licensePlateService = new LicensePlateService(_licensePlateRepositoryMock.Object);
         }
         [Fact]
-        public void GetAllPlates_ReturnsListOfPlates()
+        public async Task GetAllPlates_ReturnsListOfPlates()
         {
             // Arrange
             var expectedPlates = new List<Plate>
@@ -34,16 +35,16 @@ namespace Catalog.UnitTests
             _licensePlateRepositoryMock.Setup(x => x.GetAllAsync()).ReturnsAsync(expectedPlates);
 
             // Act
-            var actualPlates = _licensePlateService.GetAllAsync();
+            var actualPlates = await _licensePlateService.GetAllAsync();
 
             // Assert
-            Assert.NotNull(actualPlates.Result);
-            Assert.Equal(expectedPlates.Count, actualPlates.Result.ToList().Count);
-            Assert.Equal(expectedPlates, actualPlates.Result.ToList());
+            Assert.NotNull(actualPlates);
+            Assert.Equal(expectedPlates.Count, actualPlates.ToList().Count);
+            Assert.Equal(expectedPlates, actualPlates.ToList());
         }
 
         [Fact]
-        public void AddPlate_IsSuccessful()
+        public async Task AddPlate_IsSuccessful()
         {
             // Arrange
             var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
@@ -51,7 +52,7 @@ namespace Catalog.UnitTests
             _licensePlateRepositoryMock.Setup(x => x.AddLicensePlateAsync(newPlate));
 
             // Act
-            var actualPlates = _licensePlateService.AddLicensePlate(newPlate);
+            await _licensePlateService.AddLicensePlate(newPlate);
 
             // Assert
             _licensePlateRepositoryMock.Verify(x => x.AddLicensePlateAsync(newPlate), Times.Once());

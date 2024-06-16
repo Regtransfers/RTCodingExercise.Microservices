@@ -1,27 +1,34 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json;
 using RTCodingExercise.Microservices.Models;
 using System.Diagnostics;
+using WebMVC.Services;
 
 namespace RTCodingExercise.Microservices.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly HttpClient _httpClient;
+        private readonly ILicensePlateService _licensePlateService;
 
-        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)
+        public HomeController(ILicensePlateService licensePlateService)
         {
-            _logger = logger;
-            _httpClient = httpClientFactory.CreateClient();
+            _licensePlateService = licensePlateService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var response = await _httpClient.GetAsync("https://catalog-api/api/licenseplate");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var plates = JsonConvert.DeserializeObject<List<Plate>>(content);
-            return View(plates);
+            return View(await _licensePlateService.GetPlatesAsync());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddLicensePlate(Plate model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Error();
+            }
+
+            await _licensePlateService.AddLicensePlate(model);
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

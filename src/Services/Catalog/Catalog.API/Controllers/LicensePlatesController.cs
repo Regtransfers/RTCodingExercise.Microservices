@@ -1,6 +1,4 @@
 ﻿using Catalog.API.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.API.Controllers
 {
@@ -9,10 +7,12 @@ namespace Catalog.API.Controllers
     public class LicensePlatesController : ControllerBase
     {
         private readonly ILicensePlateService _licensePlatesService;
+        private readonly ILogger<LicensePlatesController> _logger;
 
-        public LicensePlatesController(ILicensePlateService platesService)
+        public LicensePlatesController(ILicensePlateService platesService, ILogger<LicensePlatesController> logger)
         {
             _licensePlatesService = platesService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -25,6 +25,7 @@ namespace Catalog.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Error retriving license plates - {ex.Message}");
                 return BadRequest(ex);
             }
         }
@@ -35,13 +36,19 @@ namespace Catalog.API.Controllers
             try
             {
                 if (!ModelState.IsValid)
+                { 
+                    _logger.LogError($"Error add new license plate requested plate is not valid.");
                     return BadRequest(ModelState);
+                }
 
                 await _licensePlatesService.AddLicensePlate(plate);
+
+                _logger.LogInformation($"Successfully added license plate {plate.Registration}.");
                 return Ok();
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Error add new license plate - {ex.Message}.");
                 return BadRequest(ex);
             }
         }

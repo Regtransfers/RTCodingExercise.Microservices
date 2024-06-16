@@ -1,16 +1,13 @@
 ﻿using Catalog.API.Data;
 using Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
 using Xunit;
 using System.Data.Common;
 using System.Linq;
-using Polly;
-using Microsoft.EntityFrameworkCore.Design;
-using System.Collections;
+using System.Threading.Tasks;
 
 namespace Catalog.UnitTests
 {
@@ -51,22 +48,22 @@ namespace Catalog.UnitTests
         public void Dispose() => _connection.Dispose();
 
         [Fact]
-        public void GetAll_ReturnsAllPlates()
+        public async Task GetAll_ReturnsAllPlates()
         {
             // Arrange 
             using var context = CreateContext();
             var licensePlateRepository = new LicensePlateRepository(context);
 
             // Act
-            var result = licensePlateRepository.GetAllAsync();
+            var result = await licensePlateRepository.GetAllAsync();
 
             // Assert
-            Assert.NotNull(result.Result);
-            Assert.Equal(_seedDataPlates.Count, result.Result.ToList().Count);
+            Assert.NotNull(result);
+            Assert.Equal(_seedDataPlates.Count, result.ToList().Count);
         }
 
         [Fact]
-        public void AddPlate_PlateAddedSuccessfully()
+        public async Task AddPlate_PlateAddedSuccessfully()
         {
             // Arrange 
             using var context = CreateContext();
@@ -75,7 +72,7 @@ namespace Catalog.UnitTests
             var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
             
             // Act
-            var result = licensePlateRepository.AddLicensePlateAsync(newPlate);
+            await licensePlateRepository.AddLicensePlateAsync(newPlate);
 
             // Assert
             var plates = context.Plates.ToList();

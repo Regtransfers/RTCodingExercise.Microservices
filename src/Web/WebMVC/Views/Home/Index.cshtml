@@ -4,7 +4,90 @@
     ViewData["Title"] = "Home Page";
 }
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">License Plate Search Engine</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Registration</th>
+                <th>Purchase Price</th>
+                <th>Sale Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plate in Model)
+            {
+                <tr>
+                    <td>@plate.Registration</td>
+                    <td>@plate.PurchasePrice.ToString("C")</td>
+                    <td>@plate.SalePrice.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="button" id="addLicensePlate">Add License Plate</button>
+
+    <div id="addLicensePlate" style="display:none;">
+        <h3>Add License Plate</h3>
+        @using (Html.BeginForm("AddLicensePlate", "Home", FormMethod.Post))
+        {
+            <label for="registration">Registration:</label>
+            <input type="text" id="registration" name="Registration" required />
+
+            <label for="purchasePrice">Purchase Price:</label>
+            <input type="number" id="purchasePrice" name="PurchasePrice" required />
+
+            <label for="salePrice">Sale Price:</label>
+            <input type="number" id="salePrice" name="SalePrice" required />
+
+            <input type="submit" value="Add" />
+        }
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#addLicensePlate').click(function () {
+                $('#addLicensePlate').show();
+            });
+            $('#addForm').validate({
+                rules: {
+                    Registration: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 7
+                    },
+                    PurchasePrice: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    },
+                    BuyPrice: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    }
+                },
+                messages: {
+                    Registration: {
+                        required: "Please enter the registration",
+                        minlength: "Registration must be at least 2 characters long",
+                        maxlength: "Registration must not exceed 7 characters"
+                    },
+                    PurchasePrice: {
+                        required: "Please enter the purchase price",
+                        number: "Sale price must be a number",
+                        min: "Sale price cannot be negative"
+                    },
+                    SalePrice: {
+                        required: "Please enter the sale price",
+                        number: "Sale price must be a number",
+                        min: "Sale price cannot be negative"
+                    }
+                }
+            });
+        });
+    </script>
 </div>
