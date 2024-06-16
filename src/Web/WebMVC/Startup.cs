@@ -1,5 +1,6 @@
 ﻿using MassTransit;
 using RabbitMQ.Client;
+using WebMVC.Services;
 
 namespace RTCodingExercise.WebMVC
 {
@@ -18,6 +19,8 @@ namespace RTCodingExercise.WebMVC
             services.AddControllers();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            services.AddScoped<ILicensePlateService, LicensePlateService>();
 
             services.AddHttpClient();
 

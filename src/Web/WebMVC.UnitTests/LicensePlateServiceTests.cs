@@ -24,8 +24,6 @@ namespace WebMVC.UnitTests
         private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
         private readonly List<Plate> _expectedPlates;
 
-        private const string _baseUrl = "http://catalog-api:80/api/licenseplate";
-
         public LicensePlateServiceTests()
         {
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
