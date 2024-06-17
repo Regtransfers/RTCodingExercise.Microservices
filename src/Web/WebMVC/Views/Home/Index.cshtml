@@ -1,16 +1,20 @@
 ﻿@using System.Globalization
 @using WebMVC.Models
 @model PlateListModel
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
 
 @{
     ViewData["Title"] = "Home Page";
 }
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="text-center">
     <h1 class="display-4">License Plate Search Engine</h1>
     <div>
-        <button type="button" id="addLicensePlate">Add License Plate</button>
+        <button type="button" id="addLicensePlate" class="btn btn-primary">Add License Plate</button>
     </div>
     <div id="addLicensePlateForm" style="display:none;">
         <h3>Add License Plate</h3>
@@ -28,30 +32,32 @@
             <input type="submit" value="Add" />
         }
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Registration</th>
-                <th>Purchase Price</th>
-                <th>Sale Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var plate in Model.Plates)
-            {
-                <tr>
-                    <td>@plate.Registration</td>
-                    <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
-                    <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
-                </tr>
-            }
-        </tbody>
-    </table>
     <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Registration</th>
+                    <th>Purchase Price</th>
+                    <th>Sale Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var plate in Model.Plates)
+                {
+                    <tr>
+                        <td>@plate.Registration</td>
+                        <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                        <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <ul class="pagination justify-content-evenly">
         @for (int i = 1; i <= Model.TotalPages; i++)
         {
-            <a href="@Url.Action("Index", new { page = i })">@i</a>
+            <li class="page-item"><a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a></li>
         }
+        </ul>
     </div>
 
     <script>
