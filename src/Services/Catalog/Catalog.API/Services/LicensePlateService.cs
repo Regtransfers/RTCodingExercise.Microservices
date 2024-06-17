@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.OData.Query;
+
 namespace Catalog.API.Services
 {
     public class LicensePlateService : ILicensePlateService
@@ -10,7 +12,7 @@ namespace Catalog.API.Services
             _licensePlateRepository = licensePlateRepository;
         }
 
-        public async Task<IEnumerable<Plate>> GetAllAsync() => await _licensePlateRepository.GetAllAsync();
+        public IQueryable<Plate> GetAll() =>  _licensePlateRepository.GetAll();
 
         public async Task AddLicensePlate(Plate plate) => await _licensePlateRepository.AddLicensePlateAsync(plate);
     }

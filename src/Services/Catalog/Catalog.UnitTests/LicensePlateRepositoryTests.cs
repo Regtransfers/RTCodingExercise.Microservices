@@ -16,7 +16,7 @@ namespace Catalog.UnitTests
         private readonly DbConnection _connection;
         private readonly DbContextOptions<ApplicationDbContext> _contextOptions;
 
-        private IList<Plate> _seedDataPlates;
+        private readonly IList<Plate> _seedDataPlates;
 
         public LicensePlateRepositoryTests()
         {
@@ -48,14 +48,14 @@ namespace Catalog.UnitTests
         public void Dispose() => _connection.Dispose();
 
         [Fact]
-        public async Task GetAll_ReturnsAllPlates()
+        public void GetAll_ReturnsAllPlates()
         {
             // Arrange 
             using var context = CreateContext();
             var licensePlateRepository = new LicensePlateRepository(context);
 
             // Act
-            var result = await licensePlateRepository.GetAllAsync();
+            var result = licensePlateRepository.GetAll();
 
             // Assert
             Assert.NotNull(result);

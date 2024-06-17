@@ -1,37 +1,27 @@
 ﻿using Catalog.API.Services;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Catalog.API.Controllers
 {
-    [Route("api/licenseplate")]
-    [ApiController]
-    public class LicensePlatesController : ControllerBase
+    public class PlateController : ODataController
     {
         private readonly ILicensePlateService _licensePlatesService;
-        private readonly ILogger<LicensePlatesController> _logger;
+        private readonly ILogger<PlateController> _logger;
 
-        public LicensePlatesController(ILicensePlateService platesService, ILogger<LicensePlatesController> logger)
+        public PlateController(ILicensePlateService platesService, ILogger<PlateController> logger)
         {
             _licensePlatesService = platesService;
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllPlatesAsync()
+        [EnableQuery(PageSize = 20)]
+        public IQueryable<Plate> Get()
         {
-            try
-            {
-                var plates = await _licensePlatesService.GetAllAsync();
-                return Ok(plates);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error retriving license plates - {ex.Message}");
-                return BadRequest(ex);
-            }
+            return _licensePlatesService.GetAll();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddLicensePlate([FromBody] Plate plate)
+        public async Task<IActionResult> Post([FromBody] Plate plate)
         {
             try
             {

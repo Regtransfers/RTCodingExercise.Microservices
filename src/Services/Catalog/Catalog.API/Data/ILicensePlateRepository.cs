@@ -2,7 +2,7 @@
 {
     public interface ILicensePlateRepository
     {
-        Task<IEnumerable<Plate>> GetAllAsync();
+        IQueryable<Plate> GetAll();
 
         Task AddLicensePlateAsync(Plate plate);
     }

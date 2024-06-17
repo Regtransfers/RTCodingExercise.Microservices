@@ -13,6 +13,8 @@ using Moq.Protected;
 using System.Text.Json;
 using System.Threading;
 using WebMVC.Services;
+using WebMVC.Models;
+using System.Linq;
 
 namespace WebMVC.UnitTests
 {
@@ -39,16 +41,24 @@ namespace WebMVC.UnitTests
         [Fact]
         public async Task Index_ReturnsViewResult_WithAListOfPlates()
         {
+            var expectedPlateList = new PlateListModel 
+            { 
+                Plates = _expectedPlates, 
+                CurrentPage = 1, 
+                PageSize = 20, 
+                TotalPlates = 3
+            };
+
             // Arrange
-            _mockLicensePlateService.Setup(x => x.GetPlatesAsync()).ReturnsAsync(_expectedPlates);
+            _mockLicensePlateService.Setup(x => x.GetPlatesAsync(1)).ReturnsAsync(expectedPlateList);
 
             // Act
             var result = await _controller.Index();
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<List<Plate>>(viewResult.Model);
-            Assert.Equal(_expectedPlates.Count, model.Count);
+            var model = Assert.IsAssignableFrom<PlateListModel>(viewResult.Model);
+            Assert.Equal(_expectedPlates.Count, model.Plates.Count());
         }
 
         [Fact]

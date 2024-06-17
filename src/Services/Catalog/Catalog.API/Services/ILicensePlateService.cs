@@ -1,8 +1,10 @@
-﻿namespace Catalog.API.Services
+﻿using Microsoft.AspNetCore.OData.Query;
+
+namespace Catalog.API.Services
 {
     public interface ILicensePlateService
     {
-        Task<IEnumerable<Plate>> GetAllAsync();
+        IQueryable<Plate> GetAll();
 
         Task AddLicensePlate(Plate plate);
     }

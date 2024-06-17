@@ -14,12 +14,14 @@ using System.Text.Json;
 using System.Threading;
 using WebMVC.Services;
 using System.Linq;
+using WebMVC.Models;
 
 namespace WebMVC.UnitTests
 {
     public class LicensePlateServiceTests
     {
         private readonly LicensePlateService _licensePlateService;
+        private readonly JsonSerializerOptions _options;
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
         private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
         private readonly List<Plate> _expectedPlates;
@@ -28,11 +30,12 @@ namespace WebMVC.UnitTests
         {
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            _options = new JsonSerializerOptions();
 
             var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
             _httpClientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _licensePlateService = new LicensePlateService(_httpClientFactoryMock.Object);
+            _licensePlateService = new LicensePlateService(_httpClientFactoryMock.Object, _options);
 
             _expectedPlates = new List<Plate>
             {
@@ -43,13 +46,13 @@ namespace WebMVC.UnitTests
         }
 
         [Fact]
-        public async Task Index_ReturnsViewResult_WithAListOfPlates()
+        public async Task GetPlatesAsync_ReturnsResult_WithAListOfPlates()
         {
             // Arrange
             var responseMessage = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonSerializer.Serialize(_expectedPlates))
+                Content = new StringContent(JsonSerializer.Serialize(new PlateListModel { Plates = _expectedPlates }))
             };
 
             _mockHttpMessageHandler
@@ -58,11 +61,37 @@ namespace WebMVC.UnitTests
                 .ReturnsAsync(responseMessage);
 
             // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync();
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1);
 
             // Assert
             Assert.NotNull(actualPlates);
-            Assert.Equal(_expectedPlates.Count, actualPlates.ToList().Count);
+            Assert.Equal(_expectedPlates.Count, actualPlates.Plates.ToList().Count);
+        }
+
+        [Fact]
+        public async Task GetPlatesAsync_ReturnsPlate_WithVATApplied()
+        {
+            // Arrange
+            var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
+
+            var responseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(new PlateListModel { Plates = new List<Plate> { plateModel } }))
+            };
+
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(responseMessage);
+
+            // Act
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1);
+
+            // Assert
+            Assert.NotNull(actualPlates);
+            Assert.Single(actualPlates.Plates);
+            Assert.Equal(plateModel.SalePrice * 1.2M, actualPlates.Plates.ToList().Single().SalePrice);
         }
 
         [Fact]

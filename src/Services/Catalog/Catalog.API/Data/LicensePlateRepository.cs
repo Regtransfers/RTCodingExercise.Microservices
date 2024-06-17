@@ -9,7 +9,7 @@
             _context = context;
         }
 
-        public async Task<IEnumerable<Plate>> GetAllAsync() => await _context.Plates.ToListAsync();
+        public IQueryable<Plate> GetAll() => _context.Plates.AsQueryable();
 
         public async Task AddLicensePlateAsync(Plate plate)
         {

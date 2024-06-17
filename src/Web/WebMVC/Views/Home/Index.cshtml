@@ -1,36 +1,18 @@
-﻿@model List<Catalog.Domain.Plate>
+﻿@using System.Globalization
+@using WebMVC.Models
+@model PlateListModel
 
 @{
     ViewData["Title"] = "Home Page";
 }
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
 <div class="text-center">
     <h1 class="display-4">License Plate Search Engine</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Registration</th>
-                <th>Purchase Price</th>
-                <th>Sale Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var plate in Model)
-            {
-                <tr>
-                    <td>@plate.Registration</td>
-                    <td>@plate.PurchasePrice.ToString("C")</td>
-                    <td>@plate.SalePrice.ToString("C")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <button type="button" id="addLicensePlate">Add License Plate</button>
-
-    <div id="addLicensePlate" style="display:none;">
+    <div>
+        <button type="button" id="addLicensePlate">Add License Plate</button>
+    </div>
+    <div id="addLicensePlateForm" style="display:none;">
         <h3>Add License Plate</h3>
         @using (Html.BeginForm("AddLicensePlate", "Home", FormMethod.Post))
         {
@@ -46,13 +28,38 @@
             <input type="submit" value="Add" />
         }
     </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Registration</th>
+                <th>Purchase Price</th>
+                <th>Sale Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plate in Model.Plates)
+            {
+                <tr>
+                    <td>@plate.Registration</td>
+                    <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                    <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <a href="@Url.Action("Index", new { page = i })">@i</a>
+        }
+    </div>
 
     <script>
         $(document).ready(function () {
             $('#addLicensePlate').click(function () {
-                $('#addLicensePlate').show();
+                $('#addLicensePlateForm').show();
             });
-            $('#addForm').validate({
+            $('#addLicensePlateForm').validate({
                 rules: {
                     Registration: {
                         required: true,

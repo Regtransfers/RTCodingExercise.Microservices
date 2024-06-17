@@ -1,8 +1,10 @@
-﻿namespace WebMVC.Services
+﻿using WebMVC.Models;
+
+namespace WebMVC.Services
 {
     public interface ILicensePlateService
     {
-        Task<IEnumerable<Plate>> GetPlatesAsync();
+        Task<PlateListModel> GetPlatesAsync(int page);
         Task AddLicensePlate(Plate model);
     }
 }
