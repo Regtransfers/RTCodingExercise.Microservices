@@ -37,6 +37,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Services\Catalog\Catalog.Domain\Catalog.Domain.csproj" />
+	  <ProjectReference Include="..\..\Services\Catalog\Catalog.DTO\Catalog.DTO.csproj" />
 	</ItemGroup>
 
 </Project>
