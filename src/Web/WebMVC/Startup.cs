@@ -1,5 +1,7 @@
 ﻿using MassTransit;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using RabbitMQ.Client;
+using WebMVC.Services;
 
 namespace RTCodingExercise.WebMVC
 {
@@ -15,8 +17,17 @@ namespace RTCodingExercise.WebMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient("PlatesApi", client =>
+            {
+                client.BaseAddress = new Uri("http://catalog-api");
+            });
+
+            services.AddScoped<IPlatesService, PlatesService>();
+
             services.AddControllers();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddSession();
+            services.AddSingleton<ITempDataProvider, SessionStateTempDataProvider>();
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
             services.AddMassTransit(x =>
@@ -68,10 +79,14 @@ namespace RTCodingExercise.WebMVC
             app.UseStaticFiles();
             app.UseForwardedHeaders();
             app.UseRouting();
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
             });
         }

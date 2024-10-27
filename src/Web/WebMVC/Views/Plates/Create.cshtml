@@ -1,0 +1,59 @@
+﻿@model Catalog.DTO.PlateCreateRequest
+@{
+    ViewData["Title"] = "Create Plate";
+}
+
+@section Styles 
+{
+    <link rel="stylesheet" href="~/css/create-plate.css" />
+}
+
+<div class="text-center">
+    <h1 class="display-4">Create a new plate</h1>
+</div>
+
+<div class="container">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="Registration"></label>
+            <input asp-for="Registration" class="form-control" />
+            <span asp-validation-for="Registration" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="PurchasePrice"></label>
+            <input asp-for="PurchasePrice" class="form-control" />
+            <span asp-validation-for="PurchasePrice" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="SalePrice"></label>
+            <input asp-for="SalePrice" class="form-control" />
+            <span asp-validation-for="SalePrice" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Letters"></label>
+            <input asp-for="Letters" class="form-control" />
+            <span asp-validation-for="Letters" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Numbers"></label>
+            <input asp-for="Numbers" class="form-control" />
+            <span asp-validation-for="Numbers" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+@if (TempData["ErrorDetails"] is not null)
+{
+    <div class="alert alert-danger">
+        <p>@TempData["ErrorDetails"]</p>
+    </div>
+}
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

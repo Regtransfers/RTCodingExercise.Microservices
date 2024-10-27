@@ -1,0 +1,43 @@
+﻿@model Catalog.DTO.PlateListResponse
+
+@{
+    ViewData["Title"] = "Plates Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Plates</h1>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Registration</th>
+            <th>Sales Price</th>
+            <th>Purchase Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var plate in Model.Plates)
+        {
+            <tr>
+                <td>@plate.Registration</td>
+                <td>£@plate.SalePrice.ToString("F2")</td>
+                <td>£@plate.PurchasePrice.ToString("F2")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    Page @Model.CurrentPage of @Model.TotalPages
+
+    @if(Model.HasPrevious)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage -1)">&lt&lt Previous</a>
+    }
+
+    @if(Model.HasNext)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.CurrentPage +1)">Next &gt&gt</a>
+    }
+</div>
