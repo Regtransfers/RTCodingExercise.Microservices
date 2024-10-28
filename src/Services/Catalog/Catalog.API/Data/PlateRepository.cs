@@ -23,8 +23,9 @@ namespace Catalog.API.Data
 
             var totalPlates = _context.Plates.Count();
 
-            var plates = await _context.Plates
-                .OrderBy(p => p.Registration)
+            var ordered = GetOrderedPlates(options);
+
+            var plates = await ordered
                 .Skip(skipAmount)
                 .Take(PageSize)
                 .Select(p => new Plate
@@ -62,6 +63,21 @@ namespace Catalog.API.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Plate?> GetByIdAsync(Guid id) => await _context.Plates.FindAsync(id); 
+        public async Task<Plate?> GetByIdAsync(Guid id) => await _context.Plates.FindAsync(id);
+
+        private IOrderedQueryable<Plate> GetOrderedPlates(QueryOptions options)
+        {
+            switch (options.OrderBy)
+            {
+                case SortOptions.SalePriceDescending:
+                    return _context.Plates.OrderByDescending(p => p.SalePrice);
+                case SortOptions.SalePriceAscending:
+                    return _context.Plates.OrderBy(p => p.SalePrice);
+                case SortOptions.RegistrationDescending:
+                    return _context.Plates.OrderByDescending(p => p.Registration);
+                default:
+                    return _context.Plates.OrderBy(p => p.Registration);
+            }
+        }
     }
 }
