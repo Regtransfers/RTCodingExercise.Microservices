@@ -16,11 +16,18 @@ namespace WebMVC.UnitTests
 {
     public class PlatesControllerTests
     {
+        private readonly IPlatesService _mockPlatesService;
+        private readonly PlatesController _controller;
+
+        public PlatesControllerTests()
+        {
+            _mockPlatesService = Substitute.For<IPlatesService>();
+            _controller = new PlatesController(_mockPlatesService);
+        }
+
         [Fact]
         public async Task IndexShouldReturnPlateDataWithView()
         {
-            var mockPlatesService = Substitute.For<IPlatesService>();
-
             var plates = new List<Plate>()
             {
                 new() { Id = Guid.NewGuid(), Registration = "A123", SalePrice = 2000, PurchasePrice = 400, Letters = "A", Numbers = 123 },
@@ -37,11 +44,9 @@ namespace WebMVC.UnitTests
                 HasPrevious = false,
             };
 
-            mockPlatesService.GetPlatesAsync(Arg.Any<int>()).Returns(platesListResponse);
+            _mockPlatesService.GetPlatesAsync(Arg.Any<SortOptions>(), Arg.Any<int>()).Returns(platesListResponse);
 
-            var controller = new PlatesController(mockPlatesService);
-
-            var result = await controller.Index();
+            var result = await _controller.Index();
 
             result.Should().BeOfType<ViewResult>().Which.Model.Should().Be(platesListResponse);
         }
@@ -49,10 +54,7 @@ namespace WebMVC.UnitTests
         [Fact]
         public async Task CreateShouldRedirectToIndexWhenSuccessful()
         {
-            var mockPlatesService = Substitute.For<IPlatesService>();
-            mockPlatesService.CreatePlateAsync(Arg.Any<PlateCreateRequest>()).Returns(new CreateUpdateResult { IsSuccess = true });
-
-            var controller = new PlatesController(mockPlatesService);
+            _mockPlatesService.CreatePlateAsync(Arg.Any<PlateCreateRequest>()).Returns(new CreateUpdateResult { IsSuccess = true });
 
             var createRequest = new PlateCreateRequest
             {
@@ -63,7 +65,7 @@ namespace WebMVC.UnitTests
                 Numbers = 123,
             };
 
-            var result = await controller.Create(createRequest);
+            var result = await _controller.Create(createRequest);
 
             result.Should().BeOfType<RedirectToActionResult>()
                 .Which.ActionName.Should().Be("Index");
@@ -78,16 +80,14 @@ namespace WebMVC.UnitTests
                 ErrorMessage = "The api encountered an error.",
             };
 
-            var mockPlatesService = Substitute.For<IPlatesService>();
-            mockPlatesService.CreatePlateAsync(Arg.Any<PlateCreateRequest>()).Returns(errorResult);
+            _mockPlatesService.CreatePlateAsync(Arg.Any<PlateCreateRequest>()).Returns(errorResult);
 
             // tempData not initialised in tests by default.
             var httpContext = new DefaultHttpContext();
             var tempDataProvider = Substitute.For<ITempDataProvider>();
             var tempData = new TempDataDictionary(httpContext, tempDataProvider);
 
-            var controller = new PlatesController(mockPlatesService);
-            controller.TempData = tempData;
+            _controller.TempData = tempData;
 
             var createRequest = new PlateCreateRequest
             {
@@ -98,10 +98,83 @@ namespace WebMVC.UnitTests
                 Numbers = 123,
             };
 
-            var result = await controller.Create(createRequest);
+            var result = await _controller.Create(createRequest);
 
             result.Should().BeOfType<ViewResult>().Which.Model.Should().Be(createRequest);
-            controller.TempData["ErrorDetails"].Should().Be("The api encountered an error.");
+            _controller.TempData["ErrorDetails"].Should().Be("The api encountered an error.");
+        }
+
+        [Fact]
+        public async Task OrderingByRegAscendingByWillToggleRegSortViewBagValueAndSetCurrentSort()
+        {
+            // registrationAscending is the default sort
+            await _controller.Index();
+
+            _controller.ViewData["RegSort"].Should().Be("registrationDescending");
+            _controller.ViewData["CurrentSortOrder"].Should().Be(string.Empty);
+        }
+
+
+        [Fact]
+        public async Task OrderingByRegDescendingByWillToggleRegSortViewBagValueAndSetCurrentSort()
+        {
+            await _controller.Index(orderBy: "registrationDescending");
+
+            _controller.ViewData["RegSort"].Should().Be(string.Empty);
+            _controller.ViewData["CurrentSortOrder"].Should().Be("registrationDescending");
+        }
+
+        [Fact]
+        public async Task OrderingBySalePriceAscendingByWillToggleSalePriceSortViewBagValueAndSetCurrentSort()
+        {
+            await _controller.Index(orderBy: "salePriceAscending");
+
+            _controller.ViewData["SalePriceSort"].Should().Be("salePriceDescending");
+            _controller.ViewData["CurrentSortOrder"].Should().Be("salePriceAscending");
+        }
+
+        [Fact]
+        public async Task OrderingBySalePriceDescendingByWillToggleSalePriceSortViewBagValueAndSetCurrentSort()
+        {
+            await _controller.Index(orderBy: "salePriceDescending");
+
+            _controller.ViewData["SalePriceSort"].Should().Be("salePriceAscending");
+            _controller.ViewData["CurrentSortOrder"].Should().Be("salePriceDescending");
+
+            await _mockPlatesService.Received().GetPlatesAsync(Arg.Is(SortOptions.SalePriceDescending), Arg.Is(1));
+        }
+
+        [Fact]
+        public async Task CanParseEmptyOrderByStringToEnum()
+        {
+            // registrationAscending is the default sort
+            await _controller.Index();
+
+            await _mockPlatesService.Received().GetPlatesAsync(Arg.Is(SortOptions.RegistrationAscending), Arg.Is(1));
+        }
+
+        [Fact]
+        public async Task CanParseRegistrationDescendingOrderByStringToEnum()
+        {
+            await _controller.Index(orderBy: "registrationDescending");
+
+            await _mockPlatesService.Received().GetPlatesAsync(Arg.Is(SortOptions.RegistrationDescending), Arg.Is(1));
+        }
+
+        [Fact]
+        public async Task CanParseSalePriceAscendingOrderByStringToEnum()
+        {
+            await _controller.Index(orderBy: "salePriceAscending");
+
+            await _mockPlatesService.Received().GetPlatesAsync(Arg.Is(SortOptions.SalePriceAscending), Arg.Is(1));
+        }
+
+        [Fact]
+        public async Task CanParseSalePriceDescendingOrderByStringToEnum()
+        {
+            await _controller.Index(orderBy: "salePriceDescending");
+
+            await _mockPlatesService.Received().GetPlatesAsync(Arg.Is(SortOptions.SalePriceDescending), Arg.Is(1));
         }
     }
 }

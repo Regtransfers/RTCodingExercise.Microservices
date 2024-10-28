@@ -12,9 +12,13 @@ namespace WebMVC.Controllers
             _platesService = platesService;
         }
 
-        public async Task<IActionResult> Index(int pageNumber = 1)
+        public async Task<IActionResult> Index(string orderBy = "", int pageNumber = 1)
         {
-            var platesResponse = await _platesService.GetPlatesAsync(pageNumber);
+            ViewData["CurrentSortOrder"] = orderBy;
+            ViewData["RegSort"] = string.IsNullOrEmpty(orderBy) ? "registrationDescending" : "";
+            ViewData["SalePriceSort"] = orderBy == "salePriceAscending" ? "salePriceDescending" : "salePriceAscending";
+
+            var platesResponse = await _platesService.GetPlatesAsync(ParseOrderBy(orderBy), pageNumber);
 
             return View(platesResponse);
         }
@@ -37,12 +41,22 @@ namespace WebMVC.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["Foo"] = "xyz";
                 TempData["ErrorDetails"] = createResult.ErrorMessage;
                 return View(plate);
             }
 
             return View(plate);
+        }
+
+        private SortOptions ParseOrderBy(string orderBy)
+        {
+            return orderBy switch
+            {
+                "salePriceDescending" => SortOptions.SalePriceDescending,
+                "salePriceAscending" => SortOptions.SalePriceAscending,
+                "registrationDescending" => SortOptions.RegistrationDescending,
+                _ => SortOptions.RegistrationAscending,
+            };
         }
     }
 }
