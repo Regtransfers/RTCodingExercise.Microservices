@@ -4,7 +4,7 @@ namespace WebMVC.Services
 {
     public interface IPlatesService
     {
-        Task<PlateListResponse> GetPlatesAsync(int pageNumber = 1);
+        Task<PlateListResponse> GetPlatesAsync(SortOptions orderBy, int pageNumber);
 
         Task<CreateUpdateResult> CreatePlateAsync(PlateCreateRequest plate);
     }

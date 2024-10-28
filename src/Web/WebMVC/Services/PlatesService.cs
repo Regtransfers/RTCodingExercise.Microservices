@@ -11,9 +11,10 @@ namespace WebMVC.Services
             _httpClient = httpClientFactory.CreateClient("PlatesApi");
         }
 
-        public async Task<PlateListResponse> GetPlatesAsync(int pageNumber = 1)
+        public async Task<PlateListResponse> GetPlatesAsync(SortOptions orderBy, int pageNumber)
         {
-            var platesResponse = await _httpClient.GetFromJsonAsync<PlateListResponse>($"api/plates?pageNumber={pageNumber}");
+            var platesResponse = await _httpClient.GetFromJsonAsync<PlateListResponse>(
+                $"api/plates?orderBy={orderBy}&pageNumber={pageNumber}");
 
             return platesResponse;
         }
