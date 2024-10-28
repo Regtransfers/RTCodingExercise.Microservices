@@ -106,7 +106,7 @@ namespace Catalog.UnitTests
 
         [Theory]
         [InlineData("111")]
-        [InlineData("AABB")]
+        [InlineData("AABBCC")]
         [InlineData("AB$")]
         public void CannotCreatePlateWithInvalidLetters(string letters)
         {
@@ -122,7 +122,7 @@ namespace Catalog.UnitTests
             var validatorResults = CheckModelIsValid(request);
 
             validatorResults.Should().ContainSingle()
-                .Which.ErrorMessage.Should().Be("Letters should be only letters and must be 3 characters or less.");
+                .Which.ErrorMessage.Should().Be("Letters should be only letters and must be 5 characters or less.");
         }
 
         [Theory]

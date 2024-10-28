@@ -14,7 +14,7 @@ namespace Catalog.DTO
         [Range(0, double.MaxValue, ErrorMessage = $"{nameof(SalePrice)} must be zero or greater.")]
         public decimal SalePrice { get; set; }
 
-        [RegularExpression("^[a-zA-Z]{1,3}$", ErrorMessage = $"{nameof(Letters)} should be only letters and must be 3 characters or less.")]
+        [RegularExpression("^[a-zA-Z]{1,5}$", ErrorMessage = $"{nameof(Letters)} should be only letters and must be 5 characters or less.")]
         public string Letters { get; set; }
 
         [Range(0, 999)]
