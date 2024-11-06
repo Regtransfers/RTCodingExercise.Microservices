@@ -9,4 +9,7 @@
 
         public DbSet<Plate> Plates { get; set; }
     }
+
+    public DbSet<Sale> Sales { get; set; }
+
 }

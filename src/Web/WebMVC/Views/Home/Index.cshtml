@@ -8,3 +8,59 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<a asp-action="OrderedByPrice">Sort by Price</a>
+
+<form asp-action="Filter" method="get">
+    <input type="text" name="query" placeholder="Enter initials or age" />
+    <button type="submit">Filter</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Plate</th>
+            <th>Purchase Price</th>
+            <th>Sale Price</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var plate in Model)
+        {
+            <tr>
+                <td>@plate.Registration</td>
+                <td>@plate.PurchasePrice</td>
+                <td>@plate.SalePrice</td>
+                <td>
+                    @if (!plate.IsSold && !plate.IsReserved)
+                    {
+                        <form asp-action="Sell" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@plate.Id" />
+                            <button type="submit">Sell</button>
+                        </form>
+                    }
+                    @if (!plate.IsReserved)
+                    {
+                        <form asp-action="Reserve" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@plate.Id" />
+                            <button type="submit">Reserve</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Total Revenue: @(ViewData["TotalRevenue"] ?? "N/A")</h3>
+
+<form asp-action="ApplyDiscount" method="get">
+    <input type="text" name="promoCode" placeholder="Enter promo code" />
+    <button type="submit">Apply Discount</button>
+</form>
+
+<div>
+    <a asp-action="Index" asp-route-pageNumber="@(ViewData["PageNumber"] as int? - 1)">Previous</a>
+    <a asp-action="Index" asp-route-pageNumber="@(ViewData["PageNumber"] as int? + 1)">Next</a>
+</div>
