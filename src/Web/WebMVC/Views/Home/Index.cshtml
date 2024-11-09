@@ -1,10 +1,43 @@
-﻿@model List<Catalog.Domain.Plate>
+﻿@model WebMVC.Models.Home
 
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Find your perfect plate</h1>
+</div>
+
+<div class="row">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Registration</th>
+                <th>Purchase Price</th>
+                <th>Sale Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plate in Model.Plates)
+            {
+                <tr>
+                    <td>@plate.Registration</td>
+                    <td>£@plate.PurchasePrice</td>
+                    <td>£@plate.SalePrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+        <a href="?pageNumber=@(Model.PageNumber - 1)&age=@Model.Age&initials=@Model.Initials&orderBy=@Model.OrderBy&discountCode=@Model.DiscountCode">Previous</a>
+    }
+    <span>Page @Model.PageNumber</span>
+    @if (Model.HasNextPage)
+    {
+        <a href="?pageNumber=@(Model.PageNumber + 1)&age=@Model.Age&initials=@Model.Initials&orderBy=@Model.OrderBy&discountCode=@Model.DiscountCode">Next</a>
+    }
 </div>

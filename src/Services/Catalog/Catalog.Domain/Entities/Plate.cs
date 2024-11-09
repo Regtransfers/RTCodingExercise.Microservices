@@ -1,4 +1,6 @@
-﻿namespace Catalog.Domain
+﻿using Catalog.Domain.ValueObjects;
+
+namespace Catalog.Domain.Entities
 {
     public class Plate
     {
@@ -8,8 +10,7 @@
 
         public decimal PurchasePrice { get; set; }
 
-        public decimal SalePrice { get; set; }
-
+        public SalePrice SalePrice => new(PurchasePrice);
         public string? Letters { get; set; }
 
         public int Numbers { get; set; }

@@ -1,20 +1,33 @@
-﻿using RTCodingExercise.Microservices.Models;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using RTCodingExercise.Microservices.Models;
+using WebMVC.Application.Services;
+using WebMVC.Models;
 
-namespace RTCodingExercise.Microservices.Controllers
+namespace WebMVC.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IPlateService _plateService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IPlateService plateService, ILogger<HomeController> logger)
         {
+            _plateService = plateService;
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
-            return View();
+            var paginatedPlates = await _plateService.GetPagedPlatesAsync(pageNumber, 20);
+            var model = new Home
+            {
+                Plates = paginatedPlates.Items,
+                PageNumber = paginatedPlates.PageNumber,
+                HasPreviousPage = paginatedPlates.HasPreviousPage,
+                HasNextPage = paginatedPlates.HasNextPage
+            };
+    
+            return View(model);
         }
 
         public IActionResult Privacy()

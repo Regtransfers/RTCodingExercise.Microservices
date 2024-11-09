@@ -101,7 +101,7 @@ namespace Catalog.API
             // Make work identity server redirections in Edge and lastest versions of browers. WARN: Not valid in a production environment.
             app.Use(async (context, next) =>
             {
-                context.Response.Headers.Add("Content-Security-Policy", "script-src 'unsafe-inline'");
+                context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'");
                 await next();
             });
 
@@ -110,7 +110,7 @@ namespace Catalog.API
             app.UseSwagger()
                 .UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint($"{ (!string.IsNullOrEmpty(pathBase) ? pathBase : string.Empty) }/swagger/v1/swagger.json", "Catalog.API V1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog.API V1");
                 });
 
             app.UseRouting();
