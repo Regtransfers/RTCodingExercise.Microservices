@@ -1,7 +1,10 @@
 ﻿using MassTransit;
 using RabbitMQ.Client;
+using WebMVC.Application.Services;
+using WebMVC.Infrastructure;
+using WebMVC.Infrastructure.Data.Repositories;
 
-namespace RTCodingExercise.WebMVC
+namespace WebMVC
 {
     public class Startup
     {
@@ -15,6 +18,18 @@ namespace RTCodingExercise.WebMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration["ConnectionString"],
+                    sqlServerOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+                        //Configuring Connection Resiliency: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency 
+                        sqlOptions.EnableRetryOnFailure(maxRetryCount: 15, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                    }));
+            
+            services.AddScoped<IPlateRepository, PlateRepository>();
+            services.AddScoped<IPlateService, PlateService>();
+            
             services.AddControllers();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
