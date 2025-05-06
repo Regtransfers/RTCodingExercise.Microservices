@@ -1,0 +1,49 @@
+﻿@model WebMVC.Models.PaginatedPlatesViewModel
+@{
+    var salesMultiplier = ViewBag.SalesMultiplier ?? 1.0m;
+}
+
+<table class="table" id="platesTable">
+    <thead>
+    <tr>
+        <th>Plate</th>
+        <th>
+            <a asp-action="Index" asp-route-page="@Model.CurrentPage" asp-route-sortBy="PurchasePrice" asp-route-sortOrder="@(Model.SortBy == "PurchasePrice" && Model.SortOrder == "asc" ? "desc" : "asc")">
+                Purchase Price
+                @if (Model.SortBy == "PurchasePrice")
+                {
+                    <span>@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </a>
+        </th>
+        <th>
+            <a asp-action="Index" asp-route-page="@Model.CurrentPage" asp-route-sortBy="SalePrice" asp-route-sortOrder="@(Model.SortBy == "SalePrice" && Model.SortOrder == "asc" ? "desc" : "asc")">
+                Sale Price
+                @if (Model.SortBy == "SalePrice")
+                {
+                    <span>@(Model.SortOrder == "asc" ? "▲" : "▼")</span>
+                }
+            </a>
+        </th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var plate in Model.Plates)
+    {
+        <tr style="color:@(plate.Status is "Reserved" or "Sold" ? "red" : "green")">
+            <td >@plate.Registration</td>
+            <td>@plate.PurchasePrice</td>
+            <td>@(plate.SalePrice * salesMultiplier)</td>
+            <td>@plate.Status</td>
+            <td>
+                <button class="btn btn-primary reserve-button" data-plateid="@plate.Id" data-status="@plate.Status"
+                        @(plate.Status == "Sold" ? "disabled" : "")>
+                    @(plate.Status == "Reserved" ? "Unreserve" : "Reserve")
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

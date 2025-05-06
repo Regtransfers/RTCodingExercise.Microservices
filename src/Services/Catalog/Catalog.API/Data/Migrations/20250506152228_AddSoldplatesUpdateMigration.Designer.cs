@@ -4,6 +4,7 @@ using Catalog.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Catalog.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250506152228_AddSoldplatesUpdateMigration")]
+    partial class AddSoldplatesUpdateMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,12 +45,43 @@ namespace Catalog.API.Migrations
                     b.Property<decimal>("SalePrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Plates");
+                });
+
+            modelBuilder.Entity("Catalog.Domain.ReservedPlates", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Reserved")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReservedPlates");
+                });
+
+            modelBuilder.Entity("Catalog.Domain.SoldPlates", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Sold")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SoldPlates");
                 });
 #pragma warning restore 612, 618
         }

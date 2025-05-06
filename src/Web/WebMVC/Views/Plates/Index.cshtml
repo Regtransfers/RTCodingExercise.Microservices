@@ -1,0 +1,144 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model WebMVC.Models.PaginatedPlatesViewModel
+
+@{
+    ViewData["Title"] = "Plates Catalogue";
+}
+
+
+<div class="text-center">
+    <h1 class="display-4">Plates Catalogue</h1>
+
+    <div class="mb-3">
+        <input type="text" id="plateFilter" class="form-control" placeholder="Filter plates by registration..." />
+    </div>
+
+    <div id="platesTableContainer">
+        @await Html.PartialAsync("_PlatesTable", Model)
+    </div>
+
+    <nav>
+        <div style="max-width: 80%; margin: 0 auto;">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)">Previous</a>
+                </li>
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <button class="btn btn-secondary mb-3 float-end" type="button" onclick="toggleForm()">Add New Plate</button>
+
+    <div id="addPlateForm" style="display: none;">
+        <form asp-action="AddPlate" method="post" class="w-50 mx-auto text-start">
+            <div class="mb-3">
+                <label asp-for="NewPlate.Registration" class="form-label">Registration</label>
+                <input asp-for="NewPlate.Registration" name="Registration" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="NewPlate.PurchasePrice" class="form-label">Purchase Price</label>
+                <input asp-for="NewPlate.PurchasePrice" name="PurchasePrice" class="form-control" type="number" step="0.01" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="NewPlate.SalePrice" class="form-label">Sale Price</label>
+                <input asp-for="NewPlate.SalePrice" name="SalePrice" class="form-control" type="number" step="0.01" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="NewPlate.Letters" class="form-label">Letters</label>
+                <input asp-for="NewPlate.Letters" name="Letters" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="NewPlate.Numbers" class="form-label">Numbers</label>
+                <input asp-for="NewPlate.Numbers" name="Numbers" class="form-control" type="number" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Plate</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleForm() {
+            $('#addPlateForm').toggle();
+        }
+
+        function reservePlate(plateId, status) {
+            $.ajax({
+                url: '/Plates/ReservePlate',
+                method: 'POST',
+                data: { id: plateId, status: status },
+                success: function (response) {
+                    $('#platesTableContainer').html(response); // updated target container
+                },
+                error: function () {
+                    alert("Failed to update plate status.");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            const loadTable = (page, sortBy, sortOrder, filter) => {
+                const url = `/Plates/PlatesTable?page=${page}&sortBy=${sortBy}&sortOrder=${sortOrder}&filter=${encodeURIComponent(filter)}`;
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function (response) {
+                        $('#platesTableContainer').html(response);
+                    },
+                    error: function () {
+                        alert("Failed to reload the table.");
+                    }
+                });
+            };
+
+            $(document).on('click', '.reserve-button', function () {
+                const plateId = $(this).data('plateid');
+                const status = $(this).data('status');
+
+                reservePlate(plateId, status);
+            });
+
+            $('#addPlateForm form').on('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: this.action,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        const filter = $('#plateFilter').val() || '';
+                        const sortBy = $('.sort-active').data('sort') || 'Registration';
+                        const sortOrder = $('.sort-active').data('order') || 'asc';
+                        loadTable(1, sortBy, sortOrder, filter);
+                        $('#addPlateForm form')[0].reset();
+                        toggleForm();
+                    },
+                    error: function (xhr) {
+                        xhr.responseText.then(msg => alert("Failed to add plate: " + msg));
+                    }
+                });
+            });
+
+            $('#plateFilter').on('input', function () {
+                setTimeout(() => {
+                    const filter = $(this).val();
+                    loadTable(1, 'Registration', 'asc', filter);
+                }, 300);
+            });
+        });
+    </script>
+}
+
