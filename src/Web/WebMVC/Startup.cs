@@ -21,9 +21,13 @@ namespace RTCodingExercise.WebMVC
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
 
+            services.AddSingleton<IShopService, ShopService>();
+            services.AddScoped<IMessageService, MessageService>();
+            //services.AddSingleton<ICatalogApiService>();
+
             services.AddMassTransit(x =>
             {
-                //x.AddConsumer<ConsumerClass>();
+                x.AddConsumer<PendingPlateConsumer>();
 
                 //ADD CONSUMERS HERE
                 x.UsingRabbitMq((context, cfg) =>
@@ -43,6 +47,12 @@ namespace RTCodingExercise.WebMVC
 
                     cfg.ConfigureEndpoints(context);
                     cfg.ExchangeType = ExchangeType.Fanout;
+
+                    cfg.ReceiveEndpoint("pendingplate-queue", e =>
+                    {
+                        e.ConfigureConsumer<PendingPlateConsumer>(context);
+                    });
+
                 });
             });
 
@@ -50,11 +60,9 @@ namespace RTCodingExercise.WebMVC
 
             services.AddRefitClient<ICatalogApiService>().ConfigureHttpClient(c =>
             {
-                c.BaseAddress = new Uri(Configuration["CatalogApiAddress"]);
+                c.BaseAddress = new Uri(Configuration["CatalogApiAddress"] ?? throw new InvalidOperationException());//throw an error if null as it means its not setup properly in the config
                 c.Timeout = TimeSpan.FromSeconds(30);
             });
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

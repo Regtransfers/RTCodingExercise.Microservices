@@ -1,0 +1,24 @@
+﻿@model WebMVC.Models.ShopViewModel
+@{
+    var salesMultiplier = ViewBag.SalesMultiplier ?? 1.0m;
+}
+
+<table class="table" id="platesTable">
+    <thead>
+    <tr>
+        <th>Plate</th>
+        <th>Sale Price</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var plate in Model.Plates)
+    {
+        <tr>
+            <td >@plate.Registration</td>
+            <td>@(plate.SalePrice * salesMultiplier)</td>
+            <td><button class="btn btn-primary buy-button" data-plateid="@plate.Id">Buy</button></td>
+        </tr>
+    }
+    </tbody>
+</table>

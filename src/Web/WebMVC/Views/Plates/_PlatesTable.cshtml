@@ -32,7 +32,7 @@
     <tbody>
     @foreach (var plate in Model.Plates)
     {
-        <tr style="color:@(plate.Status is "Reserved" or "Sold" ? "red" : "green")">
+            <tr style="color:@(plate.Status is "Reserved" ? "red" : "green");color:@(plate.Status is "Pending" ? "yellow" : "green");">
             <td >@plate.Registration</td>
             <td>@plate.PurchasePrice</td>
             <td>@(plate.SalePrice * salesMultiplier)</td>

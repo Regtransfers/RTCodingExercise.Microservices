@@ -14,5 +14,11 @@ namespace WebMVC.Services
 
         [Post("/PlatesManagementApi/ReservePlate")]
         Task<bool> ReservePlate(Guid plateId, string status);
+
+        [Post("/SellingApi/Pend")]
+        Task<bool> PendPlate(Guid plateId);
+
+        [Post("/SellingApi/Sell")]
+        Task<bool> SellPlate(Guid plateId);
     }
 }

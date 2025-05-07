@@ -12,13 +12,13 @@ public class SellingApiController : Controller
         _context = context;
     }
 
-    [HttpPost("Sell")]
+    [HttpPost("Pend")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status501NotImplemented)]
-    public async Task<bool> Sell(Plate plate)
+    public async Task<bool> Pend(Guid plateId)
     {
         var retryPolicy = Policy
             .Handle<Exception>()
@@ -34,7 +34,47 @@ public class SellingApiController : Controller
         {
             await using (_context)
             {
-                var reservedPlateToUpdate = _context.Plates.FirstOrDefault(i => i.Id == plate.Id);
+                var reservedPlateToUpdate = _context.Plates.FirstOrDefault(i => i.Id == plateId);
+                if (reservedPlateToUpdate != null)
+                {
+                    reservedPlateToUpdate.Status = "Pending";
+                }
+
+                await retryPolicy.ExecuteAsync(async () => { await _context.SaveChangesAsync(); });
+            }
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Final failure after retries: {e}");
+            return false;
+        }
+    }
+
+    [HttpPost("Sell")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status501NotImplemented)]
+    public async Task<bool> Sell(Guid plateId)
+    {
+        var retryPolicy = Policy
+            .Handle<Exception>()
+            .WaitAndRetryAsync(
+                retryCount: 3,
+                sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)), // 2s, 4s, 8s
+                onRetry: (exception, timeSpan, retryCount, context) =>
+                {
+                    Console.WriteLine($"Retry {retryCount} encountered an error: {exception.Message}. Waiting {timeSpan} before next retry.");
+                });
+
+        try
+        {
+            await using (_context)
+            {
+                var reservedPlateToUpdate = _context.Plates.FirstOrDefault(i => i.Id == plateId);
                 if (reservedPlateToUpdate != null)
                 {
                     reservedPlateToUpdate.Status = "Sold";

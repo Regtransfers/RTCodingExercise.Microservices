@@ -1,0 +1,44 @@
+﻿@model WebMVC.Models.ShopViewModel
+
+@{
+    ViewData["Title"] = "Plates Shop";
+}
+
+
+<div class="text-center">
+    <h1 class="display-4">Plates Shop</h1>
+
+    <div id="platesTableContainer">
+        @await Html.PartialAsync("_ShopTable", Model)
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        function buyPlate(plateId) {
+            $.ajax({
+                url: '/Shop/BuyPlate',
+                method: 'POST',
+                data: { id: plateId },
+                success: function (response) {
+                    $('#platesTableContainer').html(response); // updated target container
+                },
+                error: function () {
+                    alert("Failed to purchase plate.");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+
+            $(document).on('click', '.buy-button', function () {
+                const plateId = $(this).data('plateid');
+                buyPlate(plateId);
+            });
+        });
+    </script>
+}
+
