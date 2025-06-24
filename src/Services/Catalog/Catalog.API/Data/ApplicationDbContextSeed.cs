@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
+using Catalog.Domain;
 
 namespace Catalog.API.Data
 {
@@ -48,6 +49,11 @@ namespace Catalog.API.Data
             string json = File.ReadAllText(filePath);
 
             var plates = JsonConvert.DeserializeObject<List<Plate>>(json) ?? new List<Plate>();
+
+            foreach (var plate in plates)
+            {
+                plate.Status = PlateStatus.ForSale;
+            }
 
             return plates;
         }

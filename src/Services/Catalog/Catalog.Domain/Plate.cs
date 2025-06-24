@@ -1,4 +1,4 @@
-﻿namespace Catalog.Domain
+namespace Catalog.Domain
 {
     public class Plate
     {
@@ -13,5 +13,14 @@
         public string? Letters { get; set; }
 
         public int Numbers { get; set; }
+
+        public PlateStatus Status { get; set; } = PlateStatus.ForSale;
+    }
+
+    public enum PlateStatus
+    {
+        ForSale,
+        Reserved,
+        Sold
     }
 }
