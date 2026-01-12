@@ -1,17 +1,97 @@
-string Namespace = typeof(Startup).Namespace;
-string AppName = Namespace.Substring(Namespace.LastIndexOf('.', Namespace.LastIndexOf('.') - 1) + 1);
+using MassTransit;
+using RabbitMQ.Client;
 
-var configuration = GetConfiguration();
+const string AppName = "WebMVC";
 
-Log.Logger = CreateSerilogLogger(configuration);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .Enrich.WithProperty("ApplicationContext", AppName)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
 try
 {
     Log.Information("Configuring web host ({ApplicationContext})...", AppName);
-    var host = BuildWebHost(configuration, args);
+    
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add Serilog
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .MinimumLevel.Verbose()
+        .Enrich.WithProperty("ApplicationContext", AppName)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.Seq(context.Configuration["Serilog:SeqServerUrl"] ?? "http://seq")
+        .ReadFrom.Configuration(context.Configuration));
+
+    // Add services to the container
+    builder.Services.AddControllers();
+    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
+    builder.Services.AddHealthChecks();
+
+    // Add HttpClient for Catalog API
+    builder.Services.AddHttpClient("CatalogApi", client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["CatalogApiUrl"] ?? "http://localhost:5101");
+    });
+
+    builder.Services.AddMassTransit(x =>
+    {
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            var eventBusConnection = builder.Configuration["EventBusConnection"] ?? "localhost";
+            var eventBusUserName = builder.Configuration["EventBusUserName"];
+            var eventBusPassword = builder.Configuration["EventBusPassword"];
+            
+            cfg.Host(eventBusConnection, "/", h =>
+            {
+                if (!string.IsNullOrEmpty(eventBusUserName))
+                {
+                    h.Username(eventBusUserName);
+                }
+
+                if (!string.IsNullOrEmpty(eventBusPassword))
+                {
+                    h.Password(eventBusPassword);
+                }
+            });
+
+            cfg.ConfigureEndpoints(context);
+            cfg.ExchangeType = ExchangeType.Fanout;
+        });
+    });
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+    }
+
+    var pathBase = builder.Configuration["PATH_BASE"];
+    if (!string.IsNullOrEmpty(pathBase))
+    {
+        app.UsePathBase(pathBase);
+    }
+
+    app.UseStaticFiles();
+    app.UseForwardedHeaders();
+    app.UseRouting();
+
+    app.MapDefaultControllerRoute();
+    app.MapControllers();
+    app.MapHealthChecks("/health");
 
     Log.Information("Starting web host ({ApplicationContext})...", AppName);
-    host.Run();
+    app.Run();
 
     return 0;
 }
@@ -23,40 +103,4 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
-}
-
-IWebHost BuildWebHost(IConfiguration configuration, string[] args) =>
-    WebHost.CreateDefaultBuilder(args)
-        .CaptureStartupErrors(false)
-        .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
-        .UseStartup<Startup>()
-        .UseContentRoot(Directory.GetCurrentDirectory())
-        .UseSerilog()
-        .Build();
-
-Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
-{
-    var seqServerUrl = configuration["Serilog:SeqServerUrl"];
-    var logstashUrl = configuration["Serilog:LogstashgUrl"];
-    return new LoggerConfiguration()
-        .MinimumLevel.Verbose()
-        .Enrich.WithProperty("ApplicationContext", AppName)
-        .Enrich.FromLogContext()
-        .WriteTo.Console()
-        .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
-        .WriteTo.Http(string.IsNullOrWhiteSpace(logstashUrl) ? "http://localhost:8080" : logstashUrl)
-        .ReadFrom.Configuration(configuration)
-        .CreateLogger();
-}
-
-IConfiguration GetConfiguration()
-{
-    var builder = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddEnvironmentVariables();
-
-    var config = builder.Build();
-
-    return builder.Build();
 }

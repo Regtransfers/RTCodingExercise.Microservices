@@ -17,10 +17,10 @@ namespace Catalog.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.1")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Catalog.Domain.Plate", b =>
                 {
@@ -29,21 +29,53 @@ namespace Catalog.API.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Letters")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Numbers")
                         .HasColumnType("int");
 
+                    b.Property<string>("PromoCodeUsed")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("PurchasePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Registration")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ReservedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("SalePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime?>("SoldDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("SoldPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Letters");
+
+                    b.HasIndex("Numbers");
+
+                    b.HasIndex("Registration");
+
+                    b.HasIndex("SalePrice");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Status", "SalePrice");
 
                     b.ToTable("Plates");
                 });

@@ -10,6 +10,14 @@ services:
       - sqldata
       - catalog-api
 
+  webangular:
+    image: regtansfers/rtcodingexercise-webangular
+    build:
+      context: src/Web/WebAngular
+      dockerfile: Dockerfile
+    depends_on:
+      - catalog-api
+
   catalog-api:
     image: regtansfers/rtcodingexercise-catalogapi
     build:
